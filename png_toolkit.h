@@ -5,6 +5,7 @@
 #include <map>
 //#include <memory>
 #include "stb_image.h"
+#include "filter.h"
 
 struct image_data
 {
@@ -25,6 +26,7 @@ public:
     png_toolkit();
     ~png_toolkit();
     bool load( std::string const &pictureName );
+    void filter( const filter::base &filterName );
     bool save( std::string const &pictureName );
     image_data getPixelData( void ) const;
 

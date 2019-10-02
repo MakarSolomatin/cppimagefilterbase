@@ -1,5 +1,6 @@
 #include <iostream>
 #include "png_toolkit.h"
+#include "filter.h"
 
 int main( int argc, char *argv[] )
 {
@@ -12,8 +13,8 @@ int main( int argc, char *argv[] )
 
         png_toolkit studTool;
         studTool.load(argv[1]);
+        studTool.filter(filter::base());
         studTool.save(argv[2]);
-
     }
     catch (const char *str)
     {
