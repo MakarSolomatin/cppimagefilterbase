@@ -4,15 +4,8 @@
 #include <string>
 #include <map>
 //#include <memory>
-#include "stb_image.h"
+#include "image_data.h"
 #include "filter.h"
-
-struct image_data
-{
-    stbi_uc *pixels;
-    int w, h;
-    int compPerPixel;
-};
 
 class png_toolkit
 {
@@ -26,7 +19,7 @@ public:
     png_toolkit();
     ~png_toolkit();
     bool load( std::string const &pictureName );
-    void filter( const filter::base &filterName );
+    void filter( filter::base &filter );
     bool save( std::string const &pictureName );
     image_data getPixelData( void ) const;
 

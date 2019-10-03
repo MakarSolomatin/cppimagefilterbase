@@ -1,18 +1,19 @@
 #ifndef _filter_h_
 #define _filter_h_
 
-struct image_data;
+#include "image_data.h"
+
 namespace filter 
 {
   class base 
   {
   public:
-    virtual image_data apply( image_data &imgData );
+    virtual void apply( image_data &imgData );
  };
-  class fill_red : public base
+  class half_red : public base
   {
   public:
-    virtual image_data apply( image_data &imgData ) override;
+    void apply( image_data &imgData ) override;
   };
 }
 #endif /*_filter_h_*/
