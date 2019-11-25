@@ -1,8 +1,33 @@
 #include <iostream>
+#include <fstream>
 #include "png_toolkit.h"
 #include "filter.h"
 
 using namespace std;
+
+void read_config( const string &file_name ) {
+    ifstream file(file_name);
+
+    if (!file)
+    {
+        cout << "Config file not found";
+        return;
+    }
+
+    while (!file.eof())
+    {
+        string filter_name;
+        int u, l, b, r;
+
+        file >> filter_name;
+        file >> u;
+        file >> l;
+        file >> b;
+        file >> r;
+    }
+
+    file.close();
+}
 
 int main( int argc, char *argv[] )
 {
@@ -16,7 +41,7 @@ int main( int argc, char *argv[] )
         png_toolkit studTool;
         studTool.load(argv[1]);
 
-        filter::half_red my_filter;
+        filter::blur my_filter;
         studTool.filter(my_filter);
 
         studTool.save(argv[2]);

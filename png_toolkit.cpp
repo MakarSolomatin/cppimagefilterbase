@@ -35,5 +35,5 @@ image_data png_toolkit::getPixelData( void ) const
 
 void png_toolkit::filter( filter::base &filter )
 {
-    filter.apply(imgData);
+    filter(imgData);
 }
