@@ -1,11 +1,12 @@
 #include <iostream>
 #include <fstream>
+#include <vector>
 #include "png_toolkit.h"
 #include "filter.h"
 
 using namespace std;
 
-void read_config( const string &file_name ) {
+void apply_config( const string &file_name ) {
     ifstream file(file_name);
 
     if (!file)
@@ -24,6 +25,7 @@ void read_config( const string &file_name ) {
         file >> l;
         file >> b;
         file >> r;
+
     }
 
     file.close();
