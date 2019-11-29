@@ -1,47 +1,76 @@
 #include <vector>
 #include <algorithm>
+#include <cmath>
 #include "image_data.h"
 #include "filter.h"
 
-void filter::base::operator()( image_data &imgData ) {
-
+void filter::base::operator()( image_data &imgData, int u, int b, int l, int r ) {
 }
 
-void filter::half_red::operator()( image_data &imgData ) {
-    for (int y = imgData.h / 2; y < imgData.h; y++)
-        for (int x = 0; x < imgData.w; x++) {
+
+image_rect filter::base::determine_rect( image_data &imgData, int u, int b, int l, int r )
+{
+    int x1, x2, y1, y2;
+
+    if (l == 0) 
+        x1 = 0;
+    else 
+        x1 = imgData.w / l;
+
+    if (u == 0) 
+        y1 = 0;
+    else 
+        y1 = imgData.h / u;
+
+    if (r == 0) 
+        x2 = 0;
+    else 
+        x2 = imgData.w / r;
+
+    if (b == 0) 
+        y2 = 0;
+    else 
+        y2 = imgData.h / b;
+    return image_rect(x1, y1, abs(x2 - x1), abs(y2 - y1));
+}
+
+void filter::half_red::operator()( image_data &imgData, int u, int b, int l, int r ) {
+    image_rect imgRect = determine_rect(imgData, u, b, l, r);
+    for (int y = imgRect.y + imgRect.h / 2; y < imgRect.y + imgRect.h; y++)
+        for (int x = imgRect.x; x < imgRect.x + imgRect.w; x++) {
             imgData.pixels[(y * imgData.w + x) * imgData.compPerPixel] = 255;   //red
             imgData.pixels[(y * imgData.w + x) * imgData.compPerPixel + 1] = 0; //green
             imgData.pixels[(y * imgData.w + x) * imgData.compPerPixel + 2] = 0; //blue
         }
 }
 
-void filter::grayscale::operator()( image_data &imgData ) {
-    for (int y = 0; y < imgData.h; y++)
-        for (int x = 0; x < imgData.w; x++)
-        {
+void filter::grayscale::operator()( image_data &imgData, int u, int b, int l, int r ) {
+    image_rect imgRect = determine_rect(imgData, u, b, l, r);
+    for (int y = imgRect.y; y < imgRect.y + imgRect.h; y++)
+        for (int x = imgRect.x; x < imgRect.x + imgRect.w; x++) {
             stbi_uc *rgb = imgData.pixels + (y * imgData.w + x) * imgData.compPerPixel;
             rgb[0] = rgb[1] = rgb[2] = (3 * rgb[0] + 6 * rgb[1] + rgb[2]) / 10;
         }
 }
 
-void filter::red::operator()( image_data &imgData ) {
-    for (int y = 0; y < imgData.h; y++)
-        for (int x = 0; x < imgData.w; x++)
-        {
+void filter::red::operator()( image_data &imgData, int u, int b, int l, int r ) {
+    image_rect imgRect = determine_rect(imgData, u, b, l, r);
+    for (int y = imgRect.y; y < imgRect.y + imgRect.h; y++)
+        for (int x = imgRect.x; x < imgRect.x + imgRect.w; x++) {
             imgData.pixels[(y * imgData.w + x) * imgData.compPerPixel] = 255;   //red
             imgData.pixels[(y * imgData.w + x) * imgData.compPerPixel + 1] = 0; //green
             imgData.pixels[(y * imgData.w + x) * imgData.compPerPixel + 2] = 0; //blue
         }
 }
 
-void filter::threshold::operator()( image_data &imgData ) {
-    grayscale grayscale_filter;
-    grayscale_filter(imgData);
+void filter::threshold::operator()( image_data &imgData, int u, int b, int l, int r ) {
+    image_rect imgRect = determine_rect(imgData, u, b, l, r);
 
-    for (int y = 0; y < imgData.h; y++)
-        for (int x = 0; x < imgData.w; x++)
-        {
+    grayscale grayscale_filter;
+    grayscale_filter(imgData, u, b, l, r);
+
+    for (int y = imgRect.y; y < imgRect.y + imgRect.h; y++)
+        for (int x = imgRect.x; x < imgRect.x + imgRect.w; x++) {
             std::vector<stbi_uc> kernel;
             stbi_uc *rgb = imgData.pixels + (y * imgData.w + x) * imgData.compPerPixel;
             
@@ -58,17 +87,18 @@ void filter::threshold::operator()( image_data &imgData ) {
         }
 }
 
-void filter::edge::operator()( image_data &imgData ) {
+void filter::edge::operator()( image_data &imgData, int u, int b, int l, int r ) {
+    image_rect imgRect = determine_rect(imgData, u, b, l, r);
+
     grayscale grayscale_filter;
-    grayscale_filter(imgData);
+    grayscale_filter(imgData, u, b, l, r);
 
     int kernel[3][3] = {{-1, -1, -1},
                         {-1, 9, -1},
                         {-1, -1, -1}};
 
-    for (int y = 0; y < imgData.h; y++)
-        for (int x = 0; x < imgData.w; x++)
-        {
+    for (int y = imgRect.y; y < imgRect.y + imgRect.h; y++)
+        for (int x = imgRect.x; x < imgRect.x + imgRect.w; x++) {
             stbi_uc *rgb = imgData.pixels + (y * imgData.w + x) * imgData.compPerPixel;
             
             int sum = 0;
@@ -88,7 +118,9 @@ void filter::edge::operator()( image_data &imgData ) {
         }
 }
 
-void filter::blur::operator()( image_data &imgData ) {
+void filter::blur::operator()( image_data &imgData, int u, int b, int l, int r ) {
+    image_rect imgRect = determine_rect(imgData, u, b, l, r);
+
     grayscale grayscale_filter;
     grayscale_filter(imgData);
 
@@ -96,9 +128,8 @@ void filter::blur::operator()( image_data &imgData ) {
                         {1, 1, 1},
                         {1, 1, 1}};
 
-    for (int y = 0; y < imgData.h; y++)
-        for (int x = 0; x < imgData.w; x++)
-        {
+    for (int y = imgRect.y; y < imgRect.y + imgRect.h; y++)
+        for (int x = imgRect.x; x < imgRect.x + imgRect.w; x++) {
             stbi_uc *rgb = imgData.pixels + (y * imgData.w + x) * imgData.compPerPixel;
             
             int sum = 0;
