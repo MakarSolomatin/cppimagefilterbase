@@ -19,7 +19,7 @@ public:
     png_toolkit();
     ~png_toolkit();
     bool load( std::string const &pictureName );
-    void filter( filter::base &filter );
+    void filter( filter::base &filter, int u = 0, int l = 0, int b = 1, int r = 1 );
     bool save( std::string const &pictureName );
     image_data getPixelData( void ) const;
 

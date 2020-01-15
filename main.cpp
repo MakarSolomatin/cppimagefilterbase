@@ -6,17 +6,15 @@
 
 using namespace std;
 
-void apply_config( const string &file_name ) {
+void apply_config( const string &file_name, png_toolkit &stud_tool ) {
     ifstream file(file_name);
 
-    if (!file)
-    {
+    if (!file) {
         cout << "Config file not found";
         return;
     }
 
-    while (!file.eof())
-    {
+    while (!file.eof()) {
         string filter_name;
         int u, l, b, r;
 
@@ -26,6 +24,20 @@ void apply_config( const string &file_name ) {
         file >> b;
         file >> r;
 
+        filter::base *filter = nullptr;
+        if (filter_name == "Red")
+            filter = new filter::red;
+        else if (filter_name == "Threshold")
+            filter = new filter::threshold;
+        else if (filter_name == "Blur")
+            filter = new filter::blur;
+        else if (filter_name == "Edge")
+            filter = new filter::edge;
+
+        if (filter != nullptr)
+            stud_tool.filter(*filter, u, l, b, r);
+
+        delete filter;
     }
 
     file.close();
@@ -33,20 +45,15 @@ void apply_config( const string &file_name ) {
 
 int main( int argc, char *argv[] )
 {
-    // toolkit filter_name base_pic_name sudent_tool student_pic_name limitPix limitMSE
-    // toolkit near test images!
     try
     {
-        if (argc != 3)
+        if (argc != 4)
             throw "Not enough arguments";
 
-        png_toolkit studTool;
-        studTool.load(argv[1]);
-
-        filter::blur my_filter;
-        studTool.filter(my_filter);
-
-        studTool.save(argv[2]);
+        png_toolkit stud_tool;
+        stud_tool.load(argv[2]);
+        apply_config(argv[1], stud_tool);
+        stud_tool.save(argv[3]);
     }
     catch (const char *str)
     {

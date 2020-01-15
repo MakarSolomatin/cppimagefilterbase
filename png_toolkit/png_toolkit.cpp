@@ -33,7 +33,7 @@ image_data png_toolkit::getPixelData( void ) const
     return imgData;
 }
 
-void png_toolkit::filter( filter::base &filter )
+void png_toolkit::filter( filter::base &filter, int u, int l, int b, int r )
 {
-    filter(imgData);
+    filter(imgData, u, l, b, r);
 }
